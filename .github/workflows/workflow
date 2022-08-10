@@ -1,0 +1,69 @@
+name: Build and Deploy Web
+
+on:
+  push:
+    branches:
+      - main
+  
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check Repository
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - name: Export Release Timestamp
+      run: echo "APP_VERSION=v$(date +'%Y.%m.%d.%H.%m.%S')" >> $GITHUB_ENV  
+    - name: PWD
+      run: pwd
+
+    - name: Check Repository
+      uses: subosito/flutter-action@v2
+      with:
+        channel: "beta"
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Analyzing project
+      run: flutter analyze
+
+    - name: Enable web support
+      run: flutter config --enable-web
+
+    - name: Build web app
+      run: flutter build web
+
+    - name: Clean folder
+      run: rm -rf /home/runner/work/garen_gui/garen_gui/docs
+
+    - name: Copy files
+      run: cp -R /home/runner/work/garen_gui/garen_gui/build/web /home/runner/work/garen_gui/garen_gui/docs
+
+    - name: Commit files
+      run: |
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add -A
+        git commit -m "Add changes" -a
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
+    - name: Archive Web App build
+      run: |
+        cd build/web
+        zip -r web-app.zip .
+    - name: Release app
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.APP_VERSION }}
+        name: ${{ env.APP_VERSION }} Web
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: 'build/web/web-app.zip'
+        prerelease: true
