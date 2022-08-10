@@ -74680,7 +74680,7 @@ $S:0}
 A.LA.prototype={
 G(a,b){var s=A.a_(b),r=B.e.X(this.c,2),q=A.a_(b).R8.r
 q=q==null?null:q.acv(B.ba)
-return new A.Hn(A.as1(r+" \u20ac",16,null,10,q),s.as.b,28,null)}}
+return new A.Hn(A.as1(r+" \u20ac",14,null,10,q),s.as.b,29,null)}}
 A.ty.prototype={
 G(a,b){var s=null,r=this.a_0(),q=this.c,p=q.gDH()
 p=p.length>0?p[0].toUpperCase()+B.b.bC(p,1).toLowerCase():""
